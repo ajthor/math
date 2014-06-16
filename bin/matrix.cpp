@@ -11,17 +11,52 @@ using namespace v8;
 
 Persistent<Function> Matrix::constructor;
 
+// Constructor
+// -----------
+// Performs all necessary initialization of the Matric class (in C++)
 Matrix::Matrix(double rows, double cols) {
-	this->rows_ = &rows;
-	this->cols_ = &cols;
+	int i, j;
 
-	this->dimensions_ = new double[2];
-	this->dimensions_[0] = rows;
-	this->dimensions_[1] = cols;
+	this->rows_ = rows;
+	this->cols_ = cols;
+
+	this->data_ = new double*[ (int)rows ];
+
+	for (i = 0; i < rows; i++) {
+
+		this->data_[i] = new double[ (int)cols ];
+
+		// Initialize the values to 0
+		for (j = 0; j < cols; j++) {
+			this->data_[i][j] = 0;
+		}
+	}
+
 }
 
+// Handle<Value> Matrix::Zero(const Arguments& args) {
+// 	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(info.Holder());
+
+// 	HandleScope scope;
+// 	int i = 0;
+// 	int j = 0;
+
+// 	for (i = instance->rows_; i--;) {
+// 		for (j = instance->cols_; j--;) {
+// 			instance->data_[i][j] = 0;
+// 		}
+// 	}
+
+// 	return args.This();
+// }
+
 Matrix::~Matrix() {
-	delete[] this->dimensions_;
+	int i;
+	for (i = 0; i < this->rows_; i++) {
+		delete[] this->data_[i];
+	}
+
+	delete[] this->data_;
 }
 
 Handle<Value> Matrix::Add(const Arguments& args) {
@@ -38,7 +73,7 @@ Handle<Value> Matrix::Add(const Arguments& args) {
 	return scope.Close(Number::New(0));
 }
 
-Handle<Value> Matrix::Sub(const Arguments& args) {
+Handle<Value> Matrix::Get(const Arguments& args) {
 	HandleScope scope;
 	// unsigned i = 0;
 
@@ -52,31 +87,59 @@ Handle<Value> Matrix::Sub(const Arguments& args) {
 	return scope.Close(Number::New(0));
 }
 
-Handle<Value> Matrix::Mult(const Arguments& args) {
+Handle<Value> Matrix::Set(const Arguments& args) {
 	HandleScope scope;
+	// unsigned i = 0;
+
+	// Matrix m1 = node::ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
+	// Matrix m2 = node::ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+
+	// for (i = 0; i < args->Length(); i++) {
+	// 	// Add each individual element of the matrix.
+	// }
+
 	return scope.Close(Number::New(0));
 }
 
-Handle<Value> Matrix::Prod(const Arguments& args) {
-	HandleScope scope;
-	return scope.Close(Number::New(0));
-}
-
-Handle<Value> GetDimensions(Local<String> property, const AccessorInfo& info) {
+// Matrix Property: Size
+// ---------------------
+// Get the size of the matrix as a read-only property. In order to 
+// resize the array, the user will need to call `resize`.
+Handle<Value> GetSize(Local<String> property, const AccessorInfo& info) {
 	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(info.Holder());
 	
-	int i, len = sizeof(instance->dimensions_) / sizeof(instance->dimensions_[0]);
-	Handle<Array> array = Array::New(len);
+	Handle<Array> array = Array::New(2);
 
-	for (i = 0; i < 2; i++) {
-		array->Set(Number::New(i), Number::New(instance->dimensions_[i]));
+	array->Set(Number::New(0), Number::New(instance->rows_));
+	array->Set(Number::New(1), Number::New(instance->cols_));
+
+	return array;
+}
+
+// Matrix Property: Value
+// ----------------------
+// Get the matrix returned as a 2-D Array of values.
+Handle<Value> GetValue(Local<String> property, const AccessorInfo& info) {
+	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(info.Holder());
+
+	int i, j;	
+	Handle<Array> array = Array::New(instance->rows_);
+
+	for (i = 0; i < instance->rows_; i++) {
+		Local<Array> row = Array::New(instance->cols_);
+
+		for (j = 0; j < instance->cols_; j++) {
+			row->Set(Number::New(j), Number::New(instance->data_[i][j]));
+		}
+
+		array->Set(Number::New(i), row);
 	}
 
 	return array;
 }
 
-// Initialization Function
-// =======================
+// Initialization Functions
+// ========================
 // This function defines the complete API of the JavaScript object by 
 // wrapping specific C++ class functions.
 void Matrix::Init(Handle<Object> exports) {
@@ -84,25 +147,24 @@ void Matrix::Init(Handle<Object> exports) {
 	t->SetClassName(String::NewSymbol("Matrix"));
 	t->InstanceTemplate()->SetInternalFieldCount(1);
 
-	t->InstanceTemplate()->SetAccessor(String::New("dimensions"), GetDimensions);
+	t->InstanceTemplate()->SetAccessor(String::New("size"), GetSize);
+	t->InstanceTemplate()->SetAccessor(String::New("value"), GetValue);
 
 	t->PrototypeTemplate()->Set(String::NewSymbol("add"),
 		FunctionTemplate::New(Add)->GetFunction());
 
-	t->PrototypeTemplate()->Set(String::NewSymbol("sub"),
-		FunctionTemplate::New(Sub)->GetFunction());
-
-	t->PrototypeTemplate()->Set(String::NewSymbol("mult"),
-		FunctionTemplate::New(Mult)->GetFunction());
-
-	t->PrototypeTemplate()->Set(String::NewSymbol("prod"),
-		FunctionTemplate::New(Prod)->GetFunction());
+	// t->PrototypeTemplate()->Set(String::NewSymbol("zero"),
+	// 	FunctionTemplate::New(Zero)->GetFunction());
 
 	constructor = Persistent<Function>::New(t->GetFunction());
 
 	exports->Set(String::NewSymbol("Matrix"), constructor);
 }
 
+// New Matrix
+// ----------
+// The `new` function interprets JavaScript input and parses it into 
+// C++ compatible input to initialize the C++ class.
 Handle<Value> Matrix::New(const Arguments& args) {
 	HandleScope scope;
 

@@ -6,11 +6,13 @@
 class Matrix : public node::ObjectWrap {
 public:
 	static void Init(v8::Handle<v8::Object> exports);
-	double * rows_;
-	double * cols_;
-	double * dimensions_;
 
+	double rows_;
+	double cols_;
+	
+	double ** data_;
 private:
+
 	explicit Matrix(double rows, double cols);
 	~Matrix();
 
@@ -22,7 +24,7 @@ private:
 	static v8::Handle<v8::Value> Map(const v8::Arguments& args);
 	static v8::Handle<v8::Value> ForEach(const v8::Arguments& args);
 
-	void Zero(const v8::Arguments& args);
+	static v8::Handle<v8::Value> Zero(const v8::Arguments& args);
 
 	static v8::Handle<v8::Value> Join(const v8::Arguments& args);
 	static v8::Handle<v8::Value> Concat(const v8::Arguments& args);
