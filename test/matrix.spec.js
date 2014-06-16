@@ -6,6 +6,31 @@ require('mocha');
 var exported = require('../build/Release/math').Matrix;
 
 describe('matrixJs function', function () {
+
+	it('should have enumerable properties', function () {
+		expect(function () {
+
+			var instance = new exported(3, 3);
+			console.log(instance + '\n');
+
+			for (var i in instance) {
+				console.log(i, instance[i]);
+			}
+
+		}).to.not.throw(Error);
+	});
+	it('should have enumerable properties', function () {
+		expect(function () {
+
+			var instance = new exported([3, 3]);
+			console.log(instance + '\n');
+
+			for (var i in instance) {
+				console.log(i, instance[i]);
+			}
+			
+		}).to.throw(Error);
+	});
 	
 	it('should load without throwing');
 	it('should be an object Matrix');
