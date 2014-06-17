@@ -19,6 +19,7 @@ gulp.task('test', ['build'], function () {
 
 gulp.task('watch', function () {
 	gulp.watch(['./bin/**/*.cpp'], ['build', 'test']);
+	gulp.watch(['./test/**/*.spec.js'], ['test']);
 });
 
 gulp.task('default', ['watch']);
