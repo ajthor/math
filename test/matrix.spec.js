@@ -34,6 +34,30 @@ describe('matrixJs function', function () {
 	it('should have some properties');
 	
 	describe('Matrix prototype', function () {
+
+		var matrixProto = exported.prototype;
+
+		describe('get', function () {
+
+			it('should have a function \'get\'', function () {
+				expect(matrixProto.get).to.exist;
+			});
+
+			it('should return a row if passed only one index', function () {
+				var instance = new exported(3, 3);
+				var result = instance.get(1);
+
+				expect(result).to.be.an('Array');
+			});
+
+			it('should return one value if passed two indices', function () {
+				var instance = new exported(3, 3);
+				var result = instance.get(1, 1);
+
+				expect(result).to.be.a('Number');
+				expect(result).to.equal(0);
+			});
+		});
 		
 		it('should have a function \'add\'');
 		it('should add two matrices together');

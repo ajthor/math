@@ -20,14 +20,11 @@ Matrix::Matrix(double rows, double cols) {
 	this->rows_ = rows;
 	this->cols_ = cols;
 
-	this->rlen = &this->rows_;
-	this->clen = &this->cols_;
-
-	this->data_ = new double*[ (int)rows ];
+	this->data_ = new double*[ (int) rows ];
 
 	for (i = 0; i < rows; i++) {
 
-		this->data_[i] = new double[ (int)cols ];
+		this->data_[i] = new double[ (int) cols ];
 
 		// Initialize the values to 0
 		for (j = 0; j < cols; j++) {
@@ -122,6 +119,16 @@ Handle<Value> GetSize(Local<String> property, const AccessorInfo& info) {
 	return array;
 }
 
+Handle<Value> GetRows(Local<String> property, const AccessorInfo& info) {
+	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(info.Holder());
+	return Number::New(instance->rows_);
+}
+
+Handle<Value> GetCols(Local<String> property, const AccessorInfo& info) {
+	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(info.Holder());
+	return Number::New(instance->cols_);
+}
+
 // Matrix Property: Value
 // ----------------------
 // Get the matrix returned as a 2-D Array of values.
@@ -154,6 +161,9 @@ void Matrix::Init(Handle<Object> exports) {
 	t->InstanceTemplate()->SetInternalFieldCount(1);
 
 	t->InstanceTemplate()->SetAccessor(String::New("size"), GetSize);
+	t->InstanceTemplate()->SetAccessor(String::New("rows"), GetRows);
+	t->InstanceTemplate()->SetAccessor(String::New("cols"), GetCols);
+
 	t->InstanceTemplate()->SetAccessor(String::New("value"), GetValue);
 
 	t->PrototypeTemplate()->Set(String::NewSymbol("add"),
