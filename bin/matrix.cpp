@@ -1,4 +1,3 @@
-#include <iostream>
 #include <new>
 #include <cstddef>
 
@@ -52,21 +51,22 @@ Matrix::Matrix(double ** data) {
 	// }
 }
 
-// Handle<Value> Matrix::Zero(const Arguments& args) {
-// 	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(info.Holder());
+Handle<Value> Matrix::Zero(const Arguments& args) {
+	HandleScope scope;
+	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(args.This());
+	int i = 0;
+	int j = 0;
 
-// 	HandleScope scope;
-// 	int i = 0;
-// 	int j = 0;
+	double value = args[0]->IsNumber() ? args[0]->NumberValue() : 0;
 
-// 	for (i = instance->rows_; i--;) {
-// 		for (j = instance->cols_; j--;) {
-// 			instance->data_[i][j] = 0;
-// 		}
-// 	}
+	for (i = instance->rows_; i--;) {
+		for (j = instance->cols_; j--;) {
+			instance->data_[i][j] = value;
+		}
+	}
 
-// 	return args.This();
-// }
+	return args.This();
+}
 
 // Descructor
 // ----------
@@ -91,33 +91,76 @@ Handle<Value> Matrix::Add(const Arguments& args) {
 	// 	// Add each individual element of the matrix.
 	// }
 
+	int i, len;
+	for (i = 0, len = args.Length(); i < len; i++) {
+		if (args[0]->IsNumber()) {
+
+		}
+	}
+
 	return scope.Close(Number::New(0));
 }
 
 Handle<Value> Matrix::Get(const Arguments& args) {
 	HandleScope scope;
-	// unsigned i = 0;
 
-	// Matrix m1 = node::ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
-	// Matrix m2 = node::ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(args.This());
 
-	// for (i = 0; i < args->Length(); i++) {
-	// 	// Add each individual element of the matrix.
-	// }
+	if (!args[0]->IsArray() && !args[0]->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Must provide index to Matrix get function.")));
+		return scope.Close(Undefined());
+	}
 
-	return scope.Close(Number::New(0));
+	// If the user input only one number, it means we should return 
+	// one entire row.
+	if (args[0]->IsNumber() && !args[1]->IsNumber()) {
+
+		Local<Array> array = Array::New(instance->rows_);
+		int row = args[0]->Int32Value();
+
+		if (row >= 0 && row < instance->rows_) {
+			for (int i = 0; i < instance->cols_; i++) {
+				array->Set(Number::New(i), Number::New(instance->data_[row][i]));
+			}
+			return scope.Close(array);
+		}
+		else {
+			ThrowException(Exception::TypeError(String::New("Index is out of range.")));
+			return scope.Close(Undefined());
+		}
+
+	}
+
+	// Two numbers were passed to the `get` function, which means 
+	// that the user wants just one value out of the matrix.
+	if (args[0]->IsNumber() && args[1]->IsNumber()) {
+		int row = args[0]->Int32Value();
+		int col = args[1]->Int32Value();
+
+		if (row >= 0 && row < instance->rows_) {
+			if (col >= 0 && col < instance->cols_) {
+				return scope.Close(Number::New(instance->data_[row][col]));
+			}
+		}
+		
+		ThrowException(Exception::TypeError(String::New("Index is out of range.")));
+		return scope.Close(Undefined());
+	}
+
+	return scope.Close(Undefined());
 }
 
 Handle<Value> Matrix::Set(const Arguments& args) {
 	HandleScope scope;
-	// unsigned i = 0;
 
-	// Matrix m1 = node::ObjectWrap::Unwrap<Matrix>(args[0]->ToObject());
-	// Matrix m2 = node::ObjectWrap::Unwrap<Matrix>(args[1]->ToObject());
+	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(args.This());
+	// int row = args[0]->Int32Value();
+	// int col = args[1]->Int32Value();
 
-	// for (i = 0; i < args->Length(); i++) {
-	// 	// Add each individual element of the matrix.
-	// }
+	if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Must provide index to Matrix set function.")));
+		return scope.Close(Undefined());
+	}
 
 	return scope.Close(Number::New(0));
 }
@@ -187,8 +230,11 @@ void Matrix::Init(Handle<Object> exports) {
 	t->PrototypeTemplate()->Set(String::NewSymbol("add"),
 		FunctionTemplate::New(Add)->GetFunction());
 
-	// t->PrototypeTemplate()->Set(String::NewSymbol("zero"),
-	// 	FunctionTemplate::New(Zero)->GetFunction());
+	t->PrototypeTemplate()->Set(String::NewSymbol("zero"),
+		FunctionTemplate::New(Zero)->GetFunction());
+
+	t->PrototypeTemplate()->Set(String::NewSymbol("get"),
+		FunctionTemplate::New(Get)->GetFunction());
 
 	constructor = Persistent<Function>::New(t->GetFunction());
 
