@@ -7,13 +7,13 @@ class Matrix : public node::ObjectWrap {
 public:
 	static void Init(v8::Handle<v8::Object> exports);
 
-	double rows_;
-	double cols_;
+	int rows_;
+	int cols_;
 
 	double ** data_;
 private:
-
-	explicit Matrix(double rows, double cols);
+	explicit Matrix(int rows, int cols);
+	explicit Matrix(double ** data);
 	~Matrix();
 
 	static v8::Handle<v8::Value> Get(const v8::Arguments& args);
@@ -40,10 +40,9 @@ private:
 
 	static v8::Handle<v8::Value> ForEachRow(const v8::Arguments& args);
 	static v8::Handle<v8::Value> Sum();
-
+	
 	static v8::Handle<v8::Value> New(const v8::Arguments& args);
 	static v8::Persistent<v8::Function> constructor;
-
 };
 
 #endif
