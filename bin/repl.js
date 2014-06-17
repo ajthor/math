@@ -17,6 +17,8 @@ var r = repl.start({
 
 // Expose the math and instance objects to the REPL.
 r.context.math = math;
+r.context.Matrix = math.Matrix;
+r.context.Vector = math.Vector;
 
 // Print a message to the console on exit.
 r.on('exit', function () {
