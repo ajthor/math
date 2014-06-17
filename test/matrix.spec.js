@@ -8,28 +8,24 @@ var exported = require('../build/Release/math').Matrix;
 describe('matrixJs function', function () {
 
 	it('should have enumerable properties', function () {
+		var instance = new exported([3, 3]);
+		console.log(instance + '\n');
+
+		for (var i in instance) {
+			console.log(i, instance[i]);
+		}
+	});
+
+	it('should not throw if passed integer dimensions', function () {
 		expect(function () {
-
 			var instance = new exported(3, 3);
-			console.log(instance + '\n');
-
-			for (var i in instance) {
-				console.log(i, instance[i]);
-			}
-
 		}).to.not.throw(Error);
 	});
-	it('should have enumerable properties', function () {
+
+	it('should not throw if passed an array', function () {
 		expect(function () {
-
 			var instance = new exported([3, 3]);
-			console.log(instance + '\n');
-
-			for (var i in instance) {
-				console.log(i, instance[i]);
-			}
-			
-		}).to.throw(Error);
+		}).to.not.throw(Error);
 	});
 	
 	it('should load without throwing');

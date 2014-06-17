@@ -9,7 +9,10 @@ public:
 
 	double rows_;
 	double cols_;
-	
+
+	const double * rlen;
+	const double * clen;
+
 	double ** data_;
 private:
 

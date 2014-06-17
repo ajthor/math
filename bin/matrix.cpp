@@ -13,12 +13,15 @@ Persistent<Function> Matrix::constructor;
 
 // Constructor
 // -----------
-// Performs all necessary initialization of the Matric class (in C++)
+// Performs all necessary initialization of the Matrix class (in C++)
 Matrix::Matrix(double rows, double cols) {
 	int i, j;
 
 	this->rows_ = rows;
 	this->cols_ = cols;
+
+	this->rlen = &this->rows_;
+	this->clen = &this->cols_;
 
 	this->data_ = new double*[ (int)rows ];
 
@@ -50,6 +53,9 @@ Matrix::Matrix(double rows, double cols) {
 // 	return args.This();
 // }
 
+// Descructor
+// ----------
+// Clean up all allocated variables used in the class.
 Matrix::~Matrix() {
 	int i;
 	for (i = 0; i < this->rows_; i++) {
@@ -168,15 +174,26 @@ void Matrix::Init(Handle<Object> exports) {
 Handle<Value> Matrix::New(const Arguments& args) {
 	HandleScope scope;
 
-	if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
-		ThrowException(Exception::TypeError(String::New("Must provide dimensions to Matrix constructor.")));
-		return scope.Close(Undefined());
-	}
+	Matrix* matrix_instance;
+	Local<Object> dimensions;
 
 	if (args.IsConstructCall()) {
-		Matrix* matrix_instance = new Matrix(
-			args[0]->NumberValue(), 
-			args[1]->NumberValue() );
+
+		if (args[0]->IsArray()) {
+			dimensions = args[0]->ToObject();
+			matrix_instance = new Matrix(
+				dimensions->Get(0)->NumberValue(),
+				dimensions->Get(1)->NumberValue() );
+		}
+		else if (args[0]->IsNumber() && args[1]->IsNumber()) {
+			matrix_instance = new Matrix(
+				args[0]->NumberValue(), 
+				args[1]->NumberValue() );
+		}
+		else {
+			ThrowException(Exception::TypeError(String::New("Must provide dimensions to Matrix constructor.")));
+			return scope.Close(Undefined());
+		}
 
 		matrix_instance->Wrap(args.This());
 		return args.This();
