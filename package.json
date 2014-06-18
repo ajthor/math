@@ -1,0 +1,35 @@
+{
+  "name": "math",
+  "version": "0.0.0",
+  "description": "Advanced Node Math Extension",
+  "main": "build/release/math.node",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajthor/math.git"
+  },
+  "keywords": [
+    "math"
+  ],
+  "author": "Adam Thorpe",
+  "license": "MIT",
+  "gypfile": true,
+  "bugs": {
+    "url": "https://github.com/ajthor/math/issues"
+  },
+  "homepage": "https://github.com/ajthor/math",
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "gulp": "^3.8.0",
+    "gulp-mocha": "^0.4.1",
+    "gulp-shell": "^0.2.5",
+    "gulp-util": "^2.2.17",
+    "mocha": "^1.20.1"
+  }
+}
