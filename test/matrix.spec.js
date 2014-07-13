@@ -52,7 +52,7 @@ describe('matrixJs function', function () {
 
 			it('should return one value if passed two indices', function () {
 				var instance = new exported([3, 3]);
-				var result = instance.get(1, 1);
+				var result = instance.get([1, 1]);
 
 				expect(result).to.be.a('Number');
 				expect(result).to.equal(0);

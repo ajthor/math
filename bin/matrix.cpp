@@ -113,6 +113,7 @@ Handle<Value> Matrix::Get(const Arguments& args) {
 	HandleScope scope;
 
 	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(args.This());
+	Local<Array> array;
 
 	if (!args[0]->IsArray() && !args[0]->IsNumber()) {
 		ThrowException(Exception::TypeError(String::New("Must provide index to Matrix get function.")));
@@ -121,9 +122,9 @@ Handle<Value> Matrix::Get(const Arguments& args) {
 
 	// If the user input only one number, it means we should return 
 	// one entire row.
-	if (args[0]->IsNumber() && !args[1]->IsNumber()) {
+	if (args[0]->IsNumber()) {
 
-		Local<Array> array = Array::New(instance->rows_);
+		array = Array::New(instance->rows_);
 		int row = args[0]->Int32Value();
 
 		if (row >= 0 && row < instance->rows_) {
@@ -138,12 +139,14 @@ Handle<Value> Matrix::Get(const Arguments& args) {
 		}
 
 	}
+	// An array was passed to the `get` function, which means that 
+	// the user wants just one value out of the matrix.
+	else if (args[0]->IsArray()) {
 
-	// Two numbers were passed to the `get` function, which means 
-	// that the user wants just one value out of the matrix.
-	if (args[0]->IsNumber() && args[1]->IsNumber()) {
-		int row = args[0]->Int32Value();
-		int col = args[1]->Int32Value();
+		array = Array::Cast(*args[0]);
+
+		int row = array->Get(0)->Int32Value();
+		int col = array->Get(1)->Int32Value();
 
 		if (row >= 0 && row < instance->rows_) {
 			if (col >= 0 && col < instance->cols_) {
