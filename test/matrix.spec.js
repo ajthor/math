@@ -16,15 +16,15 @@ describe('matrixJs function', function () {
 		}
 	});
 
-	it('should not throw if passed integer dimensions', function () {
-		expect(function () {
-			var instance = new exported(3, 3);
-		}).to.not.throw(Error);
-	});
-
 	it('should not throw if passed an array', function () {
 		expect(function () {
 			var instance = new exported([3, 3]);
+		}).to.not.throw(Error);
+	});
+
+	it('should not throw if passed a 2-D array', function () {
+		expect(function () {
+			var instance = new exported([[3, 4], [2, 1]]);
 		}).to.not.throw(Error);
 	});
 	
@@ -44,14 +44,14 @@ describe('matrixJs function', function () {
 			});
 
 			it('should return a row if passed only one index', function () {
-				var instance = new exported(3, 3);
+				var instance = new exported([3, 3]);
 				var result = instance.get(1);
 
 				expect(result).to.be.an('Array');
 			});
 
 			it('should return one value if passed two indices', function () {
-				var instance = new exported(3, 3);
+				var instance = new exported([3, 3]);
 				var result = instance.get(1, 1);
 
 				expect(result).to.be.a('Number');

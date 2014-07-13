@@ -12,7 +12,7 @@ Persistent<Function> Matrix::constructor;
 
 // Constructor
 // -----------
-// Performs all necessary initialization of the Matrix class (in C++)
+// Performs all necessary initialization of the Matrix class.
 Matrix::Matrix(int rows, int cols) {
 	int i, j;
 
@@ -33,22 +33,30 @@ Matrix::Matrix(int rows, int cols) {
 }
 
 Matrix::Matrix(double ** data) {
-	// int i, j;
+	int i, j;
+	int rows, cols;
 
-	// this->rows_ = rows;
-	// this->cols_ = cols;
+	// Count the number of rows and cols in the dataset given to the 
+	// matrix constructor.
+	for (rows = 0; data[rows]; rows++)
+		;
 
-	// this->data_ = new double*[ rows ];
+	for (cols = 0; data[0][cols]; cols++)
+		;
 
-	// for (i = 0; i < rows; i++) {
+	this->data_ = new double*[ rows ];
 
-	// 	this->data_[i] = new double[ cols ];
+	for (i = 0; i < rows; i++) {
 
-	// 	// Initialize the values to 0
-	// 	for (j = 0; j < cols; j++) {
-	// 		this->data_[i][j] = 0;
-	// 	}
-	// }
+		this->data_[i] = new double[ cols ];
+
+		for (j = 0; j < cols; j++) {
+			this->data_[i][j] = data[i][j];
+		}
+	}
+
+	this->rows_ = rows;
+	this->cols_ = cols;
 }
 
 Handle<Value> Matrix::Zero(const Arguments& args) {
@@ -248,45 +256,60 @@ void Matrix::Init(Handle<Object> exports) {
 Handle<Value> Matrix::New(const Arguments& args) {
 	HandleScope scope;
 
+	int i;
+	int j;
+
+	int rows;
+	int cols;
+
 	Matrix* matrix_instance;
-	Local<Object> dimensions;
+	Local<Array> array;
+	Local<Array> row;
 
 	if (args.IsConstructCall()) {
 
 		// If the user passes an array, we assume the array contains 
 		// the dimensions of the matrix.
-		if (args[0]->IsArray()) {
-			dimensions = args[0]->ToObject();
-
-			// If the values passed are a 2-D array, we might assume 
-			// that the arguments passed are the values of the 
-			// matrix. In which case, we should set the values of the 
-			// matrix to be the ones passed to the constructor.
-			if (dimensions->Get(0)->IsArray()) {
-				// matrix_instance = new Matrix()
-			}
-			else {
-				matrix_instance = new Matrix(
-					dimensions->Get(0)->Int32Value(),
-					dimensions->Get(1)->Int32Value() );
-			}
-		}
-		// If the user passes two numbers, we assume these two 
-		// numbers are the dimensions of the matrix.
-		else if (args[0]->IsInt32() && args[1]->IsInt32()) {
-			matrix_instance = new Matrix(
-				args[0]->Int32Value(), 
-				args[1]->Int32Value() );
-		}
-		// Otherwise, we don't know what the user is passing, so we 
-		// can throw an error.
-		else {
+		if (!args[0]->IsArray()) {
 			ThrowException(Exception::TypeError(String::New("Must provide dimensions to Matrix constructor.")));
 			return scope.Close(Undefined());
 		}
 
+		array = Array::Cast(*args[0]);
+
+		// If the values passed are a 2-D array, we can assume 
+		// that the arguments passed are the values of the 
+		// matrix. In which case, we should set the values of the 
+		// matrix to be the ones passed to the constructor.
+		if (array->Get(0)->IsArray()) {
+			rows = array->Length();
+			cols = Array::Cast(*array->Get(0))->Length();
+
+			matrix_instance = new Matrix(rows, cols);
+
+			for (i = 0; i < rows; i++) {
+
+				row = Array::Cast(*array->Get(i));
+
+				for (j = 0; j < cols; j++) {
+					matrix_instance->data_[i][j] = row->Get(j)->NumberValue();
+				}
+			}
+
+		}
+
+		// Otherwise, we know that the numbers are the dimensions of 
+		// the array.
+		else {
+			matrix_instance = new Matrix(
+				array->Get(0)->Int32Value(),
+				array->Get(1)->Int32Value() );
+		}
+
+
 		matrix_instance->Wrap(args.This());
 		return args.This();
+
 	}
 	else {
 		const int argc = 1;
