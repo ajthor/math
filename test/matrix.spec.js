@@ -57,6 +57,15 @@ describe('matrixJs function', function () {
 				expect(result).to.be.a('Number');
 				expect(result).to.equal(0);
 			});
+
+			it('should set a value in an array', function() {
+				var instance = new exported([[1, 1], [1, 1]]);
+				instance.set([1, 1], 3);
+
+				var result = instance.get([1, 1]);
+
+				expect(result).to.equal(3);
+			});
 		});
 		
 		it('should have a function \'add\'');

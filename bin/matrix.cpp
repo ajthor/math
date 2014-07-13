@@ -161,14 +161,28 @@ Handle<Value> Matrix::Get(const Arguments& args) {
 Handle<Value> Matrix::Set(const Arguments& args) {
 	HandleScope scope;
 
-	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(args.This());
-	// int row = args[0]->Int32Value();
-	// int col = args[1]->Int32Value();
-
-	if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
-		ThrowException(Exception::TypeError(String::New("Must provide index to Matrix set function.")));
+	if (!args[0]->IsArray()) {
+		ThrowException(Exception::TypeError(String::New("Must provide an array index to Matrix set function.")));
 		return scope.Close(Undefined());
 	}
+
+	Matrix* instance = node::ObjectWrap::Unwrap<Matrix>(args.This());
+	Local<Array> array = Array::Cast(*args[0]);
+
+	int i = array->Get(0)->Int32Value();
+	int j = array->Get(1)->Int32Value();
+
+	if (!array->Get(0)->IsNumber() || !array->Get(1)->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Must provide a numerical index to Matrix set function.")));
+		return scope.Close(Undefined());
+	}
+
+	if (!args[1]->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Must provide a value to Matrix set function.")));
+		return scope.Close(Undefined());
+	}
+
+	instance->data_[i][j] = args[1]->NumberValue();
 
 	return scope.Close(Number::New(0));
 }
@@ -243,6 +257,9 @@ void Matrix::Init(Handle<Object> exports) {
 
 	t->PrototypeTemplate()->Set(String::NewSymbol("get"),
 		FunctionTemplate::New(Get)->GetFunction());
+
+	t->PrototypeTemplate()->Set(String::NewSymbol("set"),
+		FunctionTemplate::New(Set)->GetFunction());
 
 	constructor = Persistent<Function>::New(t->GetFunction());
 
